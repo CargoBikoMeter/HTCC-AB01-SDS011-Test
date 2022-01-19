@@ -73,7 +73,7 @@ void loop() {
   }
 
   //VStepUpOFF();
-  //digitalWrite(VStepUpPin, HIGH); // does not work currently, system hangs after if line is enabled
+  //digitalWrite(VStepUpPin, HIGH); // does not work currently, system hangs if line is enabled
   
   Serial.println("wait 10 seconds");
   delay(1000); // wait some time until next loop
