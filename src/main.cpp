@@ -25,6 +25,24 @@ SdsDustSensor  sds(softwareSerial);
 int VStepUpPin = _VStepUpPin;
 
 
+// switch external power ON
+void VextON()
+{
+  Serial.println("VextON");
+  pinMode(Vext,OUTPUT);
+  digitalWrite(Vext, LOW);
+  delay(500);
+}
+
+// switch external power OFF
+void VextOFF() //Vext default OFF
+{
+  Serial.println("VextOFF");
+  pinMode(Vext,OUTPUT);
+  digitalWrite(Vext, HIGH);
+  delay(500);
+}
+
 // **********   MAIN PROGRAM   ***********
 
 void setup() {
@@ -32,26 +50,22 @@ void setup() {
   delay(5000);
   Serial.println("Setup");
   
-  Serial.println("StepUpPin ON");
-  pinMode(VStepUpPin,OUTPUT);
-  digitalWrite(VStepUpPin, LOW);
-  delay(5000);
-
-  Serial.println("wakeup sensor");
-  sds.begin(); // initalize SDS011 sensor
-  Serial.println(sds.queryFirmwareVersion().toString()); // prints firmware version
-  Serial.println(sds.setQueryReportingMode().toString()); // ensures sensor is in 'query' reporting mode
 }
 
 void loop() {
   Serial.println("loop begin");
-  digitalWrite(VStepUpPin, LOW);
-  delay(5000);
+  VextON();
+
+  Serial.println("initialize sensor");
+  sds.begin(); // initalize SDS011 sensor
 
   Serial.println("wakeup sensor");
   sds.wakeup();
+  Serial.println(sds.queryFirmwareVersion().toString()); // prints firmware version
+  Serial.println(sds.setQueryReportingMode().toString()); // ensures sensor is in 'query' reporting mode
+  
+  Serial.println("clean sensor");
   delay(5000); // working some seconds to clean the internal sensor (recommended 30 seconds= 30000)
-
   PmResult pm = sds.queryPm();
   if (pm.isOk()) {
     Serial.print("PM2.5 = ");
@@ -72,11 +86,6 @@ void loop() {
     
   }
 
-  //VStepUpOFF();
-  //digitalWrite(VStepUpPin, HIGH); // does not work currently, system hangs if line is enabled
-  
-  Serial.println("wait 10 seconds");
-  delay(1000); // wait some time until next loop
-  Serial.println("loop end");
-
+  VextOFF(); // works only with a backup capacitor after StepUpConverter
+  // don't insert a delay() command here - system will hang
 }
