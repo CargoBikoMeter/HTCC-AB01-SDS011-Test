@@ -6,24 +6,14 @@
 #include "SdsDustSensor.h" // https://github.com/lewapek/sds-dust-sensors-arduino-library
 #define __DEBUG_SDS_DUST_SENSOR__
 
-// pin for StepUp module
-// VStepUpPin = GPIO5; // AB01
-#define _VStepUpPin GPIO5
-
 // GPIO3: Cubecell AB01 RX - connect with SDS011 TXD
 // GPIO2: Cubecell AB01 TX - connect with SDS011 RXD
 #define _BoardRxPin GPIO3
 #define _BoardTxPin GPIO2
 
 // SDS011 with softSerial based communication for Heltec cubecell boards: 
-softSerial softwareSerial(_BoardTxPin,_BoardRxPin); // sds(-> SDS011-RXD, -> SDS011-TXD)
+softSerial     softwareSerial(_BoardTxPin,_BoardRxPin); // sds(-> SDS011-RXD, -> SDS011-TXD)
 SdsDustSensor  sds(softwareSerial);  
-
-// Pin for switching Step-Up module HW-668 On and Off
-// needs 140 mA to drive SDS011 with 5V and 73 mA
-// VStepUpPin drives a P-MOSFET which switches the StepUpModul On/Off
-int VStepUpPin = _VStepUpPin;
-
 
 // switch external power ON
 void VextON()
@@ -35,7 +25,7 @@ void VextON()
 }
 
 // switch external power OFF
-void VextOFF() //Vext default OFF
+void VextOFF()
 {
   Serial.println("VextOFF");
   pinMode(Vext,OUTPUT);
@@ -47,15 +37,14 @@ void VextOFF() //Vext default OFF
 
 void setup() {
   Serial.begin(115200);
-  delay(5000);
+  delay(1000);
   Serial.println("Setup");
-  
 }
 
 void loop() {
-  Serial.println("loop begin");
+  Serial.println("loop begins after 5 seconds");
+  delay(5000);
   VextON();
-
   Serial.println("initialize sensor");
   sds.begin(); // initalize SDS011 sensor
 
@@ -86,6 +75,8 @@ void loop() {
     
   }
 
-  VextOFF(); // works only with a backup capacitor after StepUpConverter
-  // don't insert a delay() command here - system will hang
+  Serial.println("detach interrupt for _BoardRxPin");
+  detachInterrupt(_BoardRxPin); // prevents system hang after switching power off
+  VextOFF();
+  Serial.println("loop end");
 }
